@@ -18,6 +18,7 @@ class alert:
         self.username = ''
         self.hostname = ''
         self.fromIP = ''
+        self.acc = 0
         self.__parse()
         self.alertmsg = ALERT_TEMPLATE % (self.username, self.hostname, self.fromIP, self.ltime.strftime("%Y/%m/%d-%X"))
     
@@ -25,7 +26,7 @@ class alert:
         patt = re.compile(r'\s+')
         log = patt.split(self.rawmsg, 6)
         if log[5] != "Accepted":
-            return
+            self.acc = 1
         self.hostname = log[3]
         info = log[6]
         self.username = log[6].split(' ')[2]
@@ -41,7 +42,9 @@ def save(list):
     getWlist()
     for i in list:
         values.append((i.ltime, i.username, i.hostname, i.fromIP, i.rawmsg))
-        if i.fromIP in wlist:
+        if i.acc == 0:
+            continue
+        elif i.fromIP in wlist:
             continue
         else:
             mail_content.append(i.alertmsg)
